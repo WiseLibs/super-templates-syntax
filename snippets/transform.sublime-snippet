@@ -1,0 +1,8 @@
+<snippet>
+  <content><![CDATA[{{transform ${1}(__block)}}
+	${0}
+{{end}}]]></content>
+  <tabTrigger>transform</tabTrigger>
+  <scope>text.stl, text.stl text.html.basic, text.stl text.plain, text.stl text.xml</scope>
+  <description>transform (super templates)</description>
+</snippet>

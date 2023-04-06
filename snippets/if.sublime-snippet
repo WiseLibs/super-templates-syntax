@@ -1,0 +1,8 @@
+<snippet>
+  <content><![CDATA[{{if ${1}}}
+	${0}
+{{end}}]]></content>
+  <tabTrigger>if</tabTrigger>
+  <scope>text.stl, text.stl text.html.basic, text.stl text.plain, text.stl text.xml</scope>
+  <description>if (super templates)</description>
+</snippet>

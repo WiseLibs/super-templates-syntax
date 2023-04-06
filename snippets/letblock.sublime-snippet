@@ -1,0 +1,8 @@
+<snippet>
+  <content><![CDATA[{{let ${1}: ${2}}}
+	${0}
+{{end}}]]></content>
+  <tabTrigger>letblock</tabTrigger>
+  <scope>text.stl, text.stl text.html.basic, text.stl text.plain, text.stl text.xml</scope>
+  <description>let block (super templates)</description>
+</snippet>

@@ -1,0 +1,8 @@
+<snippet>
+  <content><![CDATA[{{section ${1}}}
+	${0}
+{{end}}]]></content>
+  <tabTrigger>sectionx</tabTrigger>
+  <scope>text.stl, text.stl text.html.basic, text.stl text.plain, text.stl text.xml</scope>
+  <description>section (super templates)</description>
+</snippet>

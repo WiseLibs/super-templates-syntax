@@ -1,0 +1,10 @@
+<snippet>
+  <content><![CDATA[{{each ${1}: ${2}}}
+	${3}
+{{else}}
+	${0}
+{{end}}]]></content>
+  <tabTrigger>eachelse</tabTrigger>
+  <scope>text.stl, text.stl text.html.basic, text.stl text.plain, text.stl text.xml</scope>
+  <description>each else (super templates)</description>
+</snippet>

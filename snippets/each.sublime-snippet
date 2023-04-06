@@ -1,0 +1,8 @@
+<snippet>
+  <content><![CDATA[{{each ${1}: ${2}}}
+	${0}
+{{end}}]]></content>
+  <tabTrigger>each</tabTrigger>
+  <scope>text.stl, text.stl text.html.basic, text.stl text.plain, text.stl text.xml</scope>
+  <description>each (super templates)</description>
+</snippet>

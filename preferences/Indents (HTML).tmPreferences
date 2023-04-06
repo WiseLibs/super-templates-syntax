@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plist version="1.0">
+<dict>
+  <key>name</key>
+  <string>Indents (HTML)</string>
+  <key>scope</key>
+  <string>text.stl text.html</string>
+  <key>settings</key>
+  <dict>
+    <key>decreaseIndentPattern</key>
+    <string><![CDATA[(?x)
+      ^\s*+                                                                                   # the beginning of the line followed by any amount of whitespace
+      (
+          [^<>]*+</(?!html)[A-Za-z0-9-]+\b[^>]*>                                              # optionally, anything that's not an angle bracket, followed by any valid HTML close tag except "html"
+      |   (<!\[endif\])?-->                                                                   # closing comment punctuation, optionally preceded by an end "comment selector"
+      |   \{\{(end|else)(?![$\x{200c}\x{200d}\p{ID_Continue}])
+      )
+    ]]></string>
+    <key>increaseIndentPattern</key>
+    <string><![CDATA[(?x)
+      ^\s*+                                                                                   # the beginning of the line followed by any amount of whitespace
+      (
+          <!--(?!.*-->)                                                                       # comments that don't close themselves on the same line
+      |   .*<(?!\?|(?i:area|base|br|col|frame|hr|html|img|input|link|meta|param)\b|[^>]*/>)   # skip self closing tags (tags that end with />, as well as known self closing tags)
+              (?<html_tag>[A-Za-z0-9-]+)(?=\s|>)\b[^>]*>(?!.*</\k<html_tag>\s*>)              # a valid non-self-closing HTML tag that doesn't close itself on the same line
+      |   .*\{\{(if|else|each|transform|section)
+              (?![$\x{200c}\x{200d}\p{ID_Continue}])
+              ([^}]|}[^}])*\}\}
+              (?!.*\{\{end(?![$\x{200c}\x{200d}\p{ID_Continue}]))
+      )
+    ]]></string>
+    <key>bracketIndentNextLinePattern</key>
+    <string><![CDATA[<!DOCTYPE(?!.*>)]]></string>
+  </dict>
+</dict>
+</plist>

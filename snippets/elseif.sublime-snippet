@@ -1,0 +1,6 @@
+<snippet>
+  <content>{{else if ${1}}}</content>
+  <tabTrigger>elseif</tabTrigger>
+  <scope>text.stl, text.stl text.html.basic, text.stl text.plain, text.stl text.xml</scope>
+  <description>else if (super templates)</description>
+</snippet>

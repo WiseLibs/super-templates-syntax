@@ -1,0 +1,320 @@
+%YAML 1.2
+---
+name: Super Templates (Plain Text)
+file_extensions:
+  - txt
+scope: text.stl
+variables:
+  word: '(?:[$_\p{ID_Start}][$\x{200c}\x{200d}\p{ID_Continue}]*+)'
+  wordbreak: '(?![$\x{200c}\x{200d}\p{ID_Continue}])'
+  wordbreakBack: '(?<![$\x{200c}\x{200d}\p{ID_Continue}])'
+contexts:
+  main:
+    - match: ''
+      set: content
+      with_prototype:
+        - include: sectionBlocksInvalid
+        - include: endTokensInvalid
+        - include: elseTokensInvalid
+        - include: commonContent
+
+  blockContent:
+    - match: ''
+      set: content
+      with_prototype:
+        - include: sectionBlocksInvalid
+        - include: endTokens
+        - include: elseTokensInvalid
+        - include: commonContent
+
+  conditionalBlockContent:
+    - match: ''
+      set: content
+      with_prototype:
+        - include: sectionBlocksInvalid
+        - include: endTokens
+        - include: elseTokensInConditional
+        - include: commonContent
+
+  loopBlockContent:
+    - match: ''
+      set: content
+      with_prototype:
+        - include: sectionBlocksInvalid
+        - include: endTokens
+        - include: elseTokensInLoop
+        - include: commonContent
+
+  includeBlockContent:
+    - match: ''
+      set: content
+      with_prototype:
+        - include: sectionBlocks
+        - include: endTokens
+        - include: elseTokensInvalid
+        - include: commonContent
+
+  commonContent:
+    - include: comments
+    - include: letBlocks
+    - include: ifBlocks
+    - include: eachBlocks
+    - include: transformBlocks
+    - include: includeBlocks
+    - include: includeTags
+    - include: slotTags
+    - include: effectTags
+    - include: injectTags
+    - include: expressionTags
+
+  comments:
+    - match: '{{!--'
+      scope: punctuation.definition.comment.begin.stl
+      push:
+        - clear_scopes: true
+        - meta_scope: text.stl comment.block.extended.stl
+        - match: '--}}'
+          scope: punctuation.definition.comment.end.stl
+          pop: true
+        - include: comments
+    - match: '{{!'
+      scope: punctuation.definition.comment.begin.stl
+      push:
+        - clear_scopes: true
+        - meta_scope: text.stl comment.block.simple.stl
+        - match: '}}'
+          scope: punctuation.definition.comment.end.stl
+          pop: true
+        - include: comments
+
+  letBlocks:
+    - match: '({{)(let){{wordbreak}}'
+      captures:
+        1: punctuation.section.interpolation.begin.stl
+        2: keyword.control.block.begin.let.stl
+      push: [blockContent, letBlockDefinition]
+
+  letBlockDefinition:
+    - clear_scopes: true
+    - meta_scope: text.stl meta.interpolation.stl
+    - match: '}}'
+      scope: punctuation.section.interpolation.end.stl
+      pop: true
+    - match: '{{word}}'
+      scope: variable.other.constant.stl
+    - match: ':'
+      scope: punctuation.separator.stl
+      set:
+        - match: '' # Fixes "text.stl" from being applied twice
+          set: javascript
+
+  ifBlocks:
+    - match: '({{)(if){{wordbreak}}'
+      captures:
+        1: punctuation.section.interpolation.begin.stl
+        2: keyword.control.block.begin.if.stl
+      push: [conditionalBlockContent, javascript]
+
+  eachBlocks:
+    - match: '({{)(each){{wordbreak}}'
+      captures:
+        1: punctuation.section.interpolation.begin.stl
+        2: keyword.control.block.begin.each.stl
+      push: [loopBlockContent, eachBlockDefinition]
+
+  eachBlockDefinition:
+    - clear_scopes: true
+    - meta_scope: text.stl meta.interpolation.stl
+    - match: '}}'
+      scope: punctuation.section.interpolation.end.stl
+      pop: true
+    - match: '{{word}}'
+      scope: variable.other.constant.stl
+    - match: ','
+      scope: punctuation.separator.stl
+    - match: ':'
+      scope: punctuation.separator.stl
+      set:
+        - match: '' # Fixes "text.stl" from being applied twice
+          set: javascript
+
+  transformBlocks:
+    - match: '({{)(transform){{wordbreak}}'
+      captures:
+        1: punctuation.section.interpolation.begin.stl
+        2: keyword.control.block.begin.transform.stl
+      push: [blockContent, javascript]
+
+  includeBlocks:
+    - match: '({{)(include){{wordbreak}}'
+      captures:
+        1: punctuation.section.interpolation.begin.stl
+        2: keyword.control.block.begin.include.stl
+      push: [includeBlockContent, includeDefinition]
+
+  includeTags:
+    - match: '({{)(>)'
+      captures:
+        1: punctuation.section.interpolation.begin.stl
+        2: keyword.other.tag.include.stl
+      push: includeDefinition
+
+  includeDefinition:
+    - clear_scopes: true
+    - meta_scope: text.stl meta.interpolation.stl
+    - match: '}}'
+      scope: punctuation.section.interpolation.end.stl
+      pop: true
+    - match: '{{wordbreakBack}}with{{wordbreak}}'
+      scope: keyword.other.binding.stl
+      push:
+        - match: '{{word}}'
+          scope: entity.name.binding.stl
+          set:
+            - match: ':'
+              scope: punctuation.separator.stl
+              pop: true
+    - match: ''
+      push:
+        - meta_content_scope: source.js.embedded.expression
+        - match: '(?=}})|{{wordbreakBack}}(?=with{{wordbreak}})'
+          pop: true
+        - include: scope:source.js
+
+  sectionBlocks:
+    - match: '({{)(section){{wordbreak}}'
+      captures:
+        1: punctuation.section.interpolation.begin.stl
+        2: keyword.control.block.begin.section.stl
+      push: [blockContent, sectionBlockDefinition]
+
+  sectionBlockDefinition:
+    - clear_scopes: true
+    - meta_scope: text.stl meta.interpolation.stl
+    - match: '}}'
+      scope: punctuation.section.interpolation.end.stl
+      pop: true
+    - match: '{{word}}'
+      scope: entity.name.section.stl
+
+  sectionBlocksInvalid:
+    - match: '{{section{{wordbreak}}'
+      push:
+        - clear_scopes: true
+        - meta_scope: text.stl invalid.illegal.stl
+        - match: '}}'
+          pop: true
+
+  slotTags:
+    - match: '({{)(slot){{wordbreak}}'
+      captures:
+        1: punctuation.section.interpolation.begin.stl
+        2: keyword.other.tag.slot.stl
+      push:
+        - clear_scopes: true
+        - meta_scope: text.stl meta.interpolation.stl
+        - match: '}}'
+          scope: punctuation.section.interpolation.end.stl
+          pop: true
+        - match: '{{word}}'
+          scope: entity.name.slot.stl
+
+  effectTags:
+    - match: '({{)(effect){{wordbreak}}'
+      captures:
+        1: punctuation.section.interpolation.begin.stl
+        2: keyword.other.tag.effect.stl
+      push: javascript
+
+  injectTags:
+    - match: '({{)(UNSAFE_INJECT){{wordbreak}}'
+      captures:
+        1: punctuation.section.interpolation.begin.stl
+        2: keyword.other.tag.inject.stl
+      push: javascript
+
+  expressionTags:
+    - match: '{{'
+      scope: punctuation.section.interpolation.begin.stl
+      push: javascript
+
+  endTokens:
+    - match: '(?={{end{{wordbreak}})'
+      set:
+        - clear_scopes: true # Fixes content's meta_scope from being applied
+        - match: '({{)(end){{wordbreak}}'
+          captures:
+            1: punctuation.section.interpolation.begin.stl
+            2: keyword.control.block.end.stl
+          set:
+            - clear_scopes: true
+            - meta_scope: text.stl meta.interpolation.stl
+            - match: '}}'
+              scope: punctuation.section.interpolation.end.stl
+              pop: true
+
+  endTokensInvalid:
+    - match: '{{end{{wordbreak}}'
+      push:
+        - clear_scopes: true
+        - meta_scope: text.stl invalid.illegal.stl
+        - match: '}}'
+          pop: true
+
+  elseTokensInConditional:
+    - match: '(?={{else{{wordbreak}})'
+      set:
+        - clear_scopes: true # Fixes content's meta_scope from being applied
+        - match: '({{)(else){{wordbreak}}'
+          captures:
+            1: punctuation.section.interpolation.begin.stl
+            2: keyword.control.block.else.stl
+          set:
+            - clear_scopes: true
+            - meta_scope: text.stl meta.interpolation.stl
+            - match: '}}'
+              scope: punctuation.section.interpolation.end.stl
+              set: blockContent
+            - match: '{{wordbreakBack}}if{{wordbreak}}'
+              scope: keyword.control.block.else-if.stl
+              set:
+                - match: '' # Fixes "text.stl" from being applied twice
+                  set: [conditionalBlockContent, javascript]
+
+  elseTokensInLoop:
+    - match: '(?={{else{{wordbreak}})'
+      set:
+        - clear_scopes: true # Fixes content's meta_scope from being applied
+        - match: '({{)(else){{wordbreak}}'
+          captures:
+            1: punctuation.section.interpolation.begin.stl
+            2: keyword.control.block.else.stl
+          set:
+            - clear_scopes: true
+            - meta_scope: text.stl meta.interpolation.stl
+            - match: '}}'
+              scope: punctuation.section.interpolation.end.stl
+              set: blockContent
+            - match: '[^\x{9}\x{b}\x{c}\x{feff}\x{a}\x{d}\x{2028}\x{2029}\p{Space_Separator}]'
+              scope: invalid.illegal.stl
+
+  elseTokensInvalid:
+    - match: '{{else{{wordbreak}}'
+      push:
+        - clear_scopes: true
+        - meta_scope: text.stl invalid.illegal.stl
+        - match: '}}'
+          pop: true
+
+  javascript:
+    - clear_scopes: true
+    - meta_scope: text.stl meta.interpolation.stl
+    - meta_content_scope: source.js.embedded.expression
+    - match: '}}'
+      scope: punctuation.section.interpolation.end.stl
+      pop: true
+    - include: scope:source.js
+
+  content:
+    - clear_scopes: true
+    - meta_content_scope: text.stl text.plain

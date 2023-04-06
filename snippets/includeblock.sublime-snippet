@@ -1,0 +1,8 @@
+<snippet>
+  <content><![CDATA[{{include '${1}'}}
+	${0}
+{{end}}]]></content>
+  <tabTrigger>includeblock</tabTrigger>
+  <scope>text.stl, text.stl text.html.basic, text.stl text.plain, text.stl text.xml</scope>
+  <description>include block (super templates)</description>
+</snippet>
